@@ -1,0 +1,45 @@
+# Visual Studio / .NET
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+out/
+
+# Rider / JetBrains
+.idea/
+
+# ASP.NET Core / Razor
+*.db
+*.sqlite
+wwwroot/lib/
+
+# Publish output
+publish/
+
+# User secrets
+secrets.json
+appsettings.*.json
+
+# Logs
+*.log
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Terraform (if using infra/)
+infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup

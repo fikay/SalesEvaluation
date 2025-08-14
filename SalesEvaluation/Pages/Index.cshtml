@@ -1,0 +1,23 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome @(User.Identity.IsAuthenticated? User.Identity.Name : "Guest")</h1>
+    <p>Ready for file Uploads!</p>
+    <form enctype="multipart/form-data" method="post" >
+        <dt>
+        <label asp-for="MultipleFileUpload">Upload CSV</label>
+        </dt>
+        <dd>
+        <input asp-for="MultipleFileUpload.files" type="file" id="excelFiles" multiple />
+        </dd>
+        <input asp-page-handler="FileUpload" class="btn-primary" type="submit" value="upload" />
+    </form>
+
+    <form method="post" asp-page-handler="CancelUpload">
+        <input type="submit" class="btn-danger" value="Cancel Upload" />
+    </form>
+</div>
