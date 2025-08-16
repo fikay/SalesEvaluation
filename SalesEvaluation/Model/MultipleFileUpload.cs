@@ -6,6 +6,6 @@ namespace SalesEvaluation.Model
     {
         [Required]
         [Display(Name = "files")]
-        public List<IFormFile> files { get; set; }
+        public List<IFormFile> files { get; set; } = new();
     }
 }

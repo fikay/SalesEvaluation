@@ -26,16 +26,19 @@ namespace SalesEvaluation.Backend.Services.Storage
         /// 
         /// </summary>
         /// <param name="files">Collection of files to be uploaded.</param>
+        /// <param name="uploadedBy">User who uploaded the document</param>
+        /// <param name="userId">User Id </param>
         /// <returns>Upload result information for each file.</returns>
-        public async Task FileUpload(Dictionary<string, UploadedFiles> files)
+        public async Task FileUpload(Dictionary<string, UploadedFiles> files, string uploadedBy, string userId )
         {
             //Perform all tasks asychronously
-            var tasks = new Task[files.Count];  
-            int index = 0;
+            var tasks = new List<Task>();
             foreach (var file in files)
             {
-                tasks[index++] = _storageService.UploadBlob(file.Key, file.Value.bytes);
+                tasks.Add(_storageService.UploadBlob(file.Key, file.Value.bytes, uploadedBy , userId));
             }
+
+           await Task.WhenAll(tasks);
         }
 
     }

@@ -1,6 +1,6 @@
-﻿
-
-using SalesEvaluation.Backend.Services.Storage;
+﻿using SalesEvaluation.Backend.Services.Storage;
+using SalesEvaluation.Backend.Utils;
+using static SalesEvaluation.Shared.Models.StorageEnums;
 
 namespace SalesEvaluation.Backend.StartUp
 {
@@ -11,21 +11,28 @@ namespace SalesEvaluation.Backend.StartUp
         {
             try
             {
-                if (section["connectionstring"].Contains("sql"))
+                if (section == null)
                 {
-                    return new DbService(section["connectionstring"]);
+                    throw new ArgumentNullException("Configuration section is null or empty.");
                 }
 
-                if (section["connectionstring"].Contains("blob.core.windows"))
+                var storageType = ConnectonStringUtil.GetStorageTypeFromConnectionString(section["connectionstring"]!);
+
+                if (storageType == StorageType.Blob)
                 {
-                    return new BlobService(section["connectionstring"], section);
+                    return new BlobService(section["connectionstring"]!, section);
                 }
 
-                return new DbService(section["connectionstring"]);
+                if (storageType == StorageType.Sql)
+                {
+                    return new DbService(section["connectionstring"]!);
+                }
+
+                return new DbService(section["connectionstring"]!);
             }
             catch 
             {
-                throw new Exception("No suitable Storage Connectioon found ");
+                throw;
             }
           
         }

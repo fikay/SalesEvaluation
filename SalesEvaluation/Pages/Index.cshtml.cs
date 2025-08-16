@@ -40,7 +40,7 @@ public class IndexModel : PageModel
         var formFileContent = await FileHelpers.ProcessFormFile(MultipleFileUpload.files ,_filesConfiguration );
 
         //Take  files qith no errors and send them to the server
-        var filesToUpload = formFileContent.Where(f => f.Value.ErrorMessage == null).ToDictionary(kvp => kvp.Key , kvp => kvp.Value);
+        var filesToUpload = formFileContent.Where(f => string.IsNullOrEmpty(f.Value.ErrorMessage)).ToDictionary(kvp => kvp.Key , kvp => kvp.Value);
         if (filesToUpload.Count == 0)
         {
             ModelState.AddModelError("files", "No valid files to upload.");

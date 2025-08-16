@@ -20,20 +20,26 @@ namespace SalesEvaluation.Utilities
 
         public static async Task<Dictionary<string, UploadedFiles>> ProcessFormFile(List<IFormFile> files, FilesEnv env)
         {
+            if (files == null)
+            {
+                throw new ArgumentNullException(nameof(files));
+            }
 
+            Dictionary<string, UploadedFiles> fileBytes = new Dictionary<string, UploadedFiles>();
 
-            if (files != null && files.Count > 10)
+            if ( files.Count > 10)
             {
                 //Run using parallel to improve performance
                 return await ProcessFormFileParallelAsync(files, env);
             }
-            Dictionary<string, UploadedFiles> fileBytes = new Dictionary<string, UploadedFiles>();
-
-            foreach (var file in files)
+            else
             {
-                fileBytes[SanitizeFileName(file.Name)] = await ValidateAndReadFileAsync(file, env);
+                foreach (var file in files)
+                {
+                    var safeFileName = SanitizeFileName(file.FileName);
+                    fileBytes[safeFileName] = await ValidateAndReadFileAsync(file, env);
+                }
             }
-
 
             return fileBytes;
         }
@@ -46,7 +52,10 @@ namespace SalesEvaluation.Utilities
             await Parallel.ForEachAsync(files, async (file, token) =>
             {
                 var result = await ValidateAndReadFileAsync(file, env);
-                results[SanitizeFileName(file.FileName)] = result;
+                var safeFileName = SanitizeFileName(file.FileName);
+                if (string.IsNullOrEmpty(safeFileName))
+                    safeFileName = "UnnamedFile";
+                results[safeFileName] = result;
             });
 
             return results.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -100,12 +109,28 @@ namespace SalesEvaluation.Utilities
             return new UploadedFiles { bytes = fileContent };
         }
 
+        /// <summary>
+        /// This method sanitizes a file name by removing or replacing unsafe characters.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
 
         public static string SanitizeFileName (string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return string.Empty;
 
+            try
+            {
+                var invalidChars = Path.GetInvalidFileNameChars();
+                var sanitizedFileName = new string(fileName.Select(ch => invalidChars.Contains(ch) ? '_' : ch).ToArray()).ToLowerInvariant();
+                return sanitizedFileName;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
-            return "";
         }
     }
 }

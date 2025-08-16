@@ -2,10 +2,11 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+    var user = User.Identity!.IsAuthenticated ? User.Identity.Name : "Guest";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome @(User.Identity.IsAuthenticated? User.Identity.Name : "Guest")</h1>
+    <h1 class="display-4">Welcome @user</h1>
     <p>Ready for file Uploads!</p>
     <form enctype="multipart/form-data" method="post" >
         <dt>
