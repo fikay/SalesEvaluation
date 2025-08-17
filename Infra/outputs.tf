@@ -12,3 +12,14 @@ output "resource_group_name" {
   description = "The name of the resource group in which resources are created"
     value       = var.resource_group_name
 }
+
+output "nat_gateway_ip_address" {
+  description = "value of the NAT gateway IP address"
+  value       = module.virtual_machine_module.nat_gateway_ip_address
+}
+
+
+output "bastion_ip_address" {
+  description = "value of the bastion subnet IP address"
+  value       = module.virtual_machine_module.bastion_ipadress
+}

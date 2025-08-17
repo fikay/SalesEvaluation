@@ -16,4 +16,6 @@ provider "azurerm" {
 module "virtual_machine_module"{
   source = "./modules/virtual_machine_module"
   resource_group_name = var.resource_group_name
+  admin_username = var.admin_username
+  admin_password = var.admin_password
 }
