@@ -11,6 +11,7 @@ This project will also be using **terraform** for the provisioning of the cloud 
 # General Resources
 - [GitHub ReadMe Styling](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#styling-text) 
 
+- [Azure resource articles](https://github.com/MicrosoftDocs/azure-docs/tree/main/articles)
 # WEEKS
 
 - [Week 1](#week-1---seting-up-terraform-cloud-and-test-deploying-a-virtual-machine)
@@ -62,27 +63,27 @@ set **resource_provider_registrations = "none"** in the terraform provider block
 4. Once able to get the details of the existing resource group, I then went ahead to creating a Virtual network.<br>
      # Tasks for the Virtual network:<br>
      ## 1. Plan Your Network
-    - [ ] Define VNet address space (e.g., `10.0.0.0/16`)
-    - [ ] Define subnets with non-overlapping IP ranges:
-    - [ ] Public subnet for user-facing resources
-    - [ ] Private subnet for core applications
-    - [ ] Decide routing and access rules for public vs private subnet
+    - [x] Define VNet address space (e.g., `10.0.0.0/16`)
+    - [x] Define subnets with non-overlapping IP ranges:
+    - [x] Public subnet for user-facing resources
+    - [x] Private subnet for core applications
+    - [x] Decide routing and access rules for public vs private subnet
 
     ## 2. Create VNet and Subnets
-    - [ ] Create the virtual network
-    - [ ] Create the public subnet
-    - [ ] Create the private subnet
-    - [ ] Ensure address ranges do not overlap
+    - [x] Create the virtual network
+    - [x] Create the public subnet
+    - [x] Create the private subnet
+    - [x] Ensure address ranges do not overlap
     - [ ] Ensure DDOS protection for the Vnet
 
     ## 3. Implement Network Security Groups (NSGs)
-    - [ ] Create NSG for public subnet
-    - [ ] Allow inbound traffic from internet (HTTP/HTTPS)
-    - [ ] Allow restricted admin access (SSH/RDP)
-    - [ ] Create NSG for private subnet
-    - [ ] Block inbound internet traffic
-    - [ ] Allow traffic only from public subnet
-    - [ ] Associate NSGs with respective subnets
+    - [x] Create NSG for public subnet
+    - [x] Allow inbound traffic from internet (HTTP/HTTPS)
+    - [x] Allow restricted admin access (SSH/RDP)
+    - [x] Create NSG for private subnet
+    - [x] Block inbound internet traffic
+    - [x] Allow traffic only from public subnet
+    - [x] Associate NSGs with respective subnets
 
     ## 4. Set Up Secure Internet Access
     - [ ] Deploy NAT Gateway or Azure Firewall for outbound traffic from private subnet
