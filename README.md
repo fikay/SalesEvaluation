@@ -86,11 +86,15 @@ set **resource_provider_registrations = "none"** in the terraform provider block
     - [x] Associate NSGs with respective subnets
 
     ## 4. Set Up Secure Internet Access
-    - [ ] Deploy NAT Gateway or Azure Firewall for outbound traffic from private subnet
-    - [ ] Restrict outbound traffic to required destinations
+    - [x] Deploy NAT Gateway or Azure Firewall for outbound traffic from private subnet
+    - [x] Restrict outbound traffic to required destinations
 
     ## 5. Deploy Public-Facing Resource
-    - [ ] Deploy VM, Application Gateway, or Load Balancer in public subnet
+    - [ ] Deploy VM, Application Gateway, or Load Balancer in public subnet.
+    This step invovled creating a VM in the bastion subnet and creating a public key to enable ssh into the VM using **ssh-keygen**.<br>
+        **Commands Used**<br>
+            - ssh-keygen -t rsa<br>
+            - ssh -i C:\Users\fikay\source\repos\SalesEvaluation\Infra\keys\bastionKey fikayofaks@40.112.232.46 <br> (to ssh into the VM)
     - [ ] Configure it to forward requests to private subnet
 
     ## 6. Configure Internal Routing
