@@ -19,3 +19,16 @@ variable "admin_password" {
   type        = string
   sensitive   = true
 }
+
+variable "private_vms_nic_names" {
+  default = {
+  front_end = {
+    vm_name = "frontendvm"
+    nic_name = "front_end_nic"
+  }
+  back_end = {
+    vm_name = "backendvm"
+    nic_name = "back_end_nic"
+  }
+  }
+}
