@@ -25,7 +25,10 @@ resource "azurerm_linux_virtual_machine" "sales_evaluation_bastion_vm" {
     version   = "latest"
   }
 
-  custom_data = filebase64("${path.module}/Scripts/bastion-bootsrap.sh")
+  custom_data = base64encode( templatefile("${path.module}/Scripts/bastion-bootsrap.sh", {
+    sa_password = var.admin_password
+    db_user_password = var.db_password
+  }))
    # SSH connection for provisioners
   connection {
     type        = "ssh"

@@ -105,7 +105,42 @@ set **resource_provider_registrations = "none"** in the terraform provider block
 
         **Running from the folder itself**
         dotnet publish -c Release -o /var/www/backend/published
+         kill -SIGTERM 7010
+        ASPNETCORE_ENVIRONMENT=Development dotnet /var/www/backend/published/SalesEvaluation.Backend.dll --urls "http://0.0.0.0:5000" &
 
+        ASPNETCORE_ENVIRONMENT=Development dotnet SalesEvaluation.Backend.dll
+
+
+        Port Forwarding SSH -L 5000:10.0.2.4:5000 fikayofaks@172.190.47.173
+
+        End Of Day  - sucessfully ran the backend on the bastion and port forwaded from my local host to see the Swagger UI
+
+    # Day 3
+        Today I am more keen on why my bootstrap script did not run to completion as sqlserver and slqcmd was not installed.
+        
+        1.  First steps check if the custom data script ran to completion. This can be done checking the cloud init logs in the folder /var/log
+         -  nano /var/log/cloud-init-output.log
+            -  Found the issue was due to it requiring interaction and aborted when It couldn't get any interaction.
+
+     After figuring that out here are the new commands I included in the script 
+     ```
+        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+        curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/mssql-server-2022.list | sudo tee /etc/apt/sources.list.d/mssql-server-2022.list
+        sudo apt-get update -y
+        sudo apt-get install -y mssql-server
+
+
+        #Switch to root user and change user password
+        sudo -i 
+        ${var.admin_username}:${var.admin_password} | chpasswd
+
+        #Switch back to the original user
+        su ${var.admin_username} 
+
+        sudo MSSQL_PID=Developer SA_PASSWORD="${var.admin_password}" ACCEPT_EULA=Y /opt/mssql/bin/mssql-conf setup
+
+        systemctl status mssql-serveR
+     ```
     ## 5. Deploy Public-Facing Resource
     - [ ] Deploy VM, Application Gateway, or Load Balancer in public subnet.
     This step invovled creating a VM in the bastion subnet and creating a public key to enable ssh into the VM using **ssh-keygen**.<br>
