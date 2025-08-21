@@ -88,18 +88,72 @@ set **resource_provider_registrations = "none"** in the terraform provider block
     ## 4. Set Up Secure Internet Access
     - [x] Deploy NAT Gateway or Azure Firewall for outbound traffic from private subnet
     - [x] Restrict outbound traffic to required destinations
+    
+    # Day 2
 
+    Notes from day 2:
+        - When running the custom data script, it uses the root user, so when I ssh'ed into it and using my profile, I could not get some commands to work as they were only installed for the root user.In order to get it to work I changed the cript to install the tool globally for all users.
+
+        Also, when you ssh into a VM and you by chance reconfigure it and it has the same IP address, you need to delete the previous one from the .ssh folder.
+
+        In the Bastion VM after installling sql server and trying to set it up, It required a password for my user which had not been set so to switch to the root I used **sudo -i**  Switch back to my user using **su -fikayofaks**
+
+        To Login to the sql server using the cli sqlcmd -s localhost -U sa -P 'yourpassword' -C -l 30 -q "select @@version" (last part is for the trusrtserver cert , -q tells it to kick you out immediayely after).
+
+        Running dotnet inside the project folder using the launch setting aspnetcore environment. Using the dll you have to set it in the ~/bash .
+
+
+        **Running from the folder itself**
+        dotnet publish -c Release -o /var/www/backend/published
+         kill -SIGTERM 7010
+        ASPNETCORE_ENVIRONMENT=Development dotnet /var/www/backend/published/SalesEvaluation.Backend.dll --urls "http://0.0.0.0:5000" &
+
+        ASPNETCORE_ENVIRONMENT=Development dotnet SalesEvaluation.Backend.dll
+
+
+        Port Forwarding SSH -L 5000:10.0.2.4:5000 fikayofaks@172.190.47.173
+
+        End Of Day  - sucessfully ran the backend on the bastion and port forwaded from my local host to see the Swagger UI
+
+    # Day 3
+        Today I am more keen on why my bootstrap script did not run to completion as sqlserver and slqcmd was not installed.
+        
+        1.  First steps check if the custom data script ran to completion. This can be done checking the cloud init logs in the folder /var/log
+         -  nano /var/log/cloud-init-output.log
+            -  Found the issue was due to it requiring interaction and aborted when It couldn't get any interaction.
+
+     After figuring that out here are the new commands I included in the script 
+     ```
+        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+        curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/mssql-server-2022.list | sudo tee /etc/apt/sources.list.d/mssql-server-2022.list
+        sudo apt-get update -y
+        sudo apt-get install -y mssql-server
+
+
+        #Switch to root user and change user password
+        sudo -i 
+        ${var.admin_username}:${var.admin_password} | chpasswd
+
+        #Switch back to the original user
+        su ${var.admin_username} 
+
+        sudo MSSQL_PID=Developer SA_PASSWORD="${var.admin_password}" ACCEPT_EULA=Y /opt/mssql/bin/mssql-conf setup
+
+        systemctl status mssql-serveR
+     ```
     ## 5. Deploy Public-Facing Resource
     - [ ] Deploy VM, Application Gateway, or Load Balancer in public subnet.
     This step invovled creating a VM in the bastion subnet and creating a public key to enable ssh into the VM using **ssh-keygen**.<br>
         **Commands Used**<br>
             - ssh-keygen -t rsa<br>
-            - ssh -i C:\Users\fikay\source\repos\SalesEvaluation\Infra\keys\bastionKey fikayofaks@40.112.232.46 <br> (to ssh into the VM)
+            - ssh -i C:\Users\fikay\source\repos\SalesEvaluation\Infra\keys\bastionKey fikayofaks@40.112.232.46 <br> (to ssh into the VM)<br>
+
+        In other to get the SSH key unto the Bastion VM, I had to use the provisioner file and remote-exec block. The file block moves a file from my local directory into the VM. In order to do that, it needs a way to connect to the VM through ssh which leads to the connection block.
     - [ ] Configure it to forward requests to private subnet
 
     ## 6. Configure Internal Routing
-    - [ ] Ensure public subnet can communicate with private subnet
-    - [ ] Enforce private subnet access restrictions
+    - [x] Ensure public subnet can communicate with private subnet
+    - [x] Enforce private subnet access restrictions
 
     ## 7. Apply Security Enhancements
     - [ ] Enable DDoS protection for public subnet

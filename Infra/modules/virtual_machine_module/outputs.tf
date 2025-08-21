@@ -12,3 +12,8 @@ output "bastion_ipadress" {
   description = "value of the bastion subnet IP address"
   value       = azurerm_subnet.sales_evaluation_bastion_subnet.address_prefixes[0]
 }
+
+output "bastion_public_ip_address" {
+  description = "The public IP address for the Bastion VM"
+  value       = azurerm_public_ip.bastion_vm_public_ip.ip_address
+}
