@@ -19,4 +19,5 @@ module "virtual_machine_module"{
   admin_username = var.admin_username
   admin_password = var.admin_password
   db_password = var.db_password
+  github_token = var.github_token
 }

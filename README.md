@@ -141,6 +141,21 @@ set **resource_provider_registrations = "none"** in the terraform provider block
 
         systemctl status mssql-serveR
      ```
+
+     # Day 4 
+     Today I am getting familiar with Github access tokens in order to include it in my custom data script to auto download my repo on the Linux Machine. I will be going with the Fine grained token for more granular access and also for secuirty reasons as I will be granting just access to one repo instead of my entire github account.
+
+     Learning how to make the program a service using a script and also how to proxy using NGINX.
+
+     ```
+        To see the logs of a service 
+        sudo journalctl -u {service name} -f
+
+
+        NGINX LOGS
+        sudo tail -f /var/log/nginx/access.log
+
+     ```
     ## 5. Deploy Public-Facing Resource
     - [ ] Deploy VM, Application Gateway, or Load Balancer in public subnet.
     This step invovled creating a VM in the bastion subnet and creating a public key to enable ssh into the VM using **ssh-keygen**.<br>
