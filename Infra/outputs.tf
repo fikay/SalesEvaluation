@@ -28,3 +28,8 @@ output "bastion_public_ip_address" {
   description = "The public IP address for the Bastion VM"
   value       = module.virtual_machine_module.bastion_public_ip_address
 }
+
+output "bastion_private_ip_address" {
+  description = "The private IP address for the Bastion VM"
+  value       = module.virtual_machine_module.bastion_private_ip_address
+}
