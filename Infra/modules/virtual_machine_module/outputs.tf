@@ -17,3 +17,8 @@ output "bastion_public_ip_address" {
   description = "The public IP address for the Bastion VM"
   value       = azurerm_public_ip.bastion_vm_public_ip.ip_address
 }
+
+output "bastion_private_ip_address" {
+  description = "The private IP address for the Bastion VM"
+  value       = azurerm_network_interface.sales_evaluation_bastion_nic.private_ip_address
+}
