@@ -22,3 +22,8 @@ output "bastion_private_ip_address" {
   description = "The private IP address for the Bastion VM"
   value       = azurerm_network_interface.sales_evaluation_bastion_nic.private_ip_address
 }
+
+# output "private_vm_nic_ids" {
+#   description = "The IDs of the network interfaces for the private VMs"
+#   value       = [for nic in azurerm_network_interface.private_vm_nics : nic.id]
+# }

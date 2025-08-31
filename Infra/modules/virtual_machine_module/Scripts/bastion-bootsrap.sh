@@ -8,6 +8,27 @@ sudo apt-get upgrade -y
 # Install .NET SDK and runtime
 sudo apt-get install -y dotnet-sdk-8.0 aspnetcore-runtime-8.0
 
+
+
+
+#Install GithHub CLI
+(type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
+	&& sudo mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& sudo mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+	&& sudo apt update \
+	&& sudo apt install gh -y
+
+
+# Configure GitHub CLI
+# export GITHUB_TOKEN=${github_token}
+export HOME=/home/fikayofaks
+export DOTNET_CLI_HOME=$HOME
+# Clone the repository into www directory and publish the application
+if [ "${dest}" == "backend" ];then
 # Add Microsoft repo keys for SQL Server
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-prod.gpg > /dev/null
 
@@ -50,24 +71,6 @@ GO
 SQL
 
 
-#Install GithHub CLI
-(type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
-	&& sudo mkdir -p -m 755 /etc/apt/keyrings \
-	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-	&& cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-	&& sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-	&& sudo mkdir -p -m 755 /etc/apt/sources.list.d \
-	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-	&& sudo apt update \
-	&& sudo apt install gh -y
-
-
-# Configure GitHub CLI
-# export GITHUB_TOKEN=${github_token}
-
-# Clone the repository into www directory and publish the application
-export HOME=/home/fikayofaks
-export DOTNET_CLI_HOME=$HOME
 sudo mkdir /var/www
 sudo chown $USER:$USER /var/www
 cd /var/www
@@ -76,19 +79,98 @@ cd SalesEvaluation/SalesEvaluation.Backend
 # Restore dependencies
 dotnet restore
 # Publish the application
-sudo mkdir -p /var/www/sales-evaluation-API
+sudo mkdir -p /var/www/sales-evaluation-${dest}
 
 #Get the appsettings file from /home directory and copy sqlscripts to the www directory
-sudo cp /home/fikayofaks/appsettings.Development.json /var/www/sales-evaluation-API/appsettings.Development.json
-sudo cp -r /var/www/SalesEvaluation/SalesEvaluation.Backend/SqlScripts /var/www/sales-evaluation-API/SqlScripts
+sudo cp /home/fikayofaks/appsettings.Development.json /var/www/sales-evaluation-${dest}/appsettings.Development.json
+sudo cp -r /var/www/SalesEvaluation/SalesEvaluation.Backend/SqlScripts /var/www/sales-evaluation-${dest}/SqlScripts
 # Publish the application to the specified output directory
-dotnet publish -c Release -o /var/www/sales-evaluation-API
+dotnet publish -c Release -o /var/www/sales-evaluation-${dest}
+
+#Create a systemd service for the .NET application
+sudo tee /etc/systemd/system/sales-evaluation-${dest}.service <<EOF
+[Unit]
+Description=Sales Evaluation .NET Web ${dest}
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/sales-evaluation-${dest}
+ExecStart=/usr/bin/dotnet /var/www/sales-evaluation-${dest}/SalesEvaluation.Backend.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=sales-evaluation-${dest}
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Development
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+Environment=DOTNET_CLI_HOME=/home/fikayofaks
+Environment=HOME=/home/fikayofaks
+Environment=DOTNET_ROOT=/usr/share/dotnet
 
 
+[Install]
+WantedBy=multi-user.target
+EOF
+fi
+
+if [ "${dest}" == "frontend" ];then
+sudo mkdir /var/www
+sudo chown $USER:$USER /var/www
+cd /var/www
+git clone https://${github_token}@github.com/fikay/SalesEvaluation.git
+cd SalesEvaluation/SalesEvaluation
+# Restore dependencies
+dotnet restore
+# Publish the application
+sudo mkdir -p /var/www/sales-evaluation-${dest}
+
+#Get the appsettings file from /home directory and copy sqlscripts to the www directory
+sudo cp /home/fikayofaks/appsettings.Development.json /var/www/sales-evaluation-${dest}/appsettings.Development.json
+# sudo cp -r /var/www/SalesEvaluation/SalesEvaluation.Backend/SqlScripts /var/www/sales-evaluation-API/SqlScripts
+# Publish the application to the specified output directory
+dotnet publish -c Release -o /var/www/sales-evaluation-${dest}
+
+sudo tee /etc/systemd/system/sales-evaluation-${dest}.service <<EOF
+[Unit]
+Description=Sales Evaluation .NET Web ${dest}
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/sales-evaluation-${dest}
+ExecStart=/usr/bin/dotnet /var/www/sales-evaluation-${dest}/SalesEvaluation.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=sales-evaluation-${dest}
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Development
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+Environment=DOTNET_CLI_HOME=/home/fikayofaks
+Environment=HOME=/home/fikayofaks
+Environment=DOTNET_ROOT=/usr/share/dotnet
+
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+fi
+
+# Reload systemd to recognize the new service
+sudo systemctl daemon-reload
+# Start and enable the service to run on boot
+sudo systemctl start sales-evaluation-${dest}
+sudo systemctl enable sales-evaluation-${dest}
 # Install Nginx
 sudo apt-get install -y nginx
+
+
 # Configure Nginx to serve the application
-sudo tee /etc/nginx/sites-available/sales-evaluation-API <<EOF
+sudo tee /etc/nginx/sites-available/sales-evaluation-${dest} <<EOF
 server {
     listen 80;
     server_name localhost;
@@ -104,7 +186,7 @@ server {
 }
 EOF
 # Enable the Nginx configuration
-sudo ln -s /etc/nginx/sites-available/sales-evaluation-API /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/sales-evaluation-${dest} /etc/nginx/sites-enabled/
 # Test the Nginx configuration
 sudo nginx -t
 # Restart Nginx to apply the changes
@@ -116,38 +198,9 @@ sudo systemctl enable nginx
 # sudo apt-get install -y certbot python3-certbot-nginx
 
 
-#Create a systemd service for the .NET application
-sudo tee /etc/systemd/system/sales-evaluation-API.service <<EOF
-[Unit]
-Description=Sales Evaluation .NET Web API
-After=network.target
-
-[Service]
-WorkingDirectory=/var/www/sales-evaluation-API
-ExecStart=/usr/bin/dotnet /var/www/sales-evaluation-API/SalesEvaluation.Backend.dll
-Restart=always
-# Restart service after 10 seconds if the dotnet service crashes:
-RestartSec=10
-KillSignal=SIGINT
-SyslogIdentifier=sales-evaluation-API
-User=www-data
-Environment=ASPNETCORE_ENVIRONMENT=Development
-Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
-Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
-Environment=DOTNET_CLI_HOME=/home/fikayofaks
-Environment=HOME=/home/fikayofaks
-Environment=DOTNET_ROOT=/usr/share/dotnet
 
 
-[Install]
-WantedBy=multi-user.target
-EOF
 
-# Reload systemd to recognize the new service
-sudo systemctl daemon-reload
-# Start and enable the service to run on boot
-sudo systemctl start sales-evaluation-API
-sudo systemctl enable sales-evaluation-API
 
 # 
 

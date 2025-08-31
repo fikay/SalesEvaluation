@@ -29,6 +29,7 @@ resource "azurerm_linux_virtual_machine" "sales_evaluation_bastion_vm" {
     sa_password = var.admin_password
     db_user_password = var.db_password
     github_token = var.github_token
+    dest = "bastion"
   }))
    # SSH connection for provisioners
   connection {
@@ -42,14 +43,8 @@ resource "azurerm_linux_virtual_machine" "sales_evaluation_bastion_vm" {
   provisioner "file" {
     source      = "${path.module}/../../keys/bastionKey"
     destination = "/home/${var.admin_username}/.ssh/bastionKey"
+    
   }
-
-
-    provisioner "file" {
-    source      = "${path.module}/../../../SalesEvaluation.Backend/appsettings.Development.json"
-    destination = "/home/${var.admin_username}/appsettings.Development.json"
-  }
-
 
   provisioner "remote-exec" {
     inline = [ 
@@ -87,7 +82,34 @@ for_each = var.private_vms_nic_names
     storage_account_type = "Standard_LRS"
   }
 
-  custom_data = filebase64("${path.module}/Scripts/bastion-bootsrap.sh")
+  custom_data =  base64encode( templatefile("${path.module}/Scripts/bastion-bootsrap.sh", {
+    sa_password = var.admin_password
+    db_user_password = var.db_password
+    github_token = var.github_token
+    vm_role = each.value.vm_name
+    dest = replace(each.value.vm_name, "vm", "")
+  }))
+
+ connection {
+    type        = "ssh"
+    host        = azurerm_network_interface.private_subnet_nics[each.key].private_ip_address
+    user        = var.admin_username
+    private_key = file("${path.module}/../../keys/bastionKey")
+    timeout     = "2m"
+
+    bastion_host = azurerm_public_ip.bastion_vm_public_ip.ip_address
+    bastion_user = var.admin_username
+    bastion_private_key = file("${path.module}/../../keys/bastionKey")
+    bastion_port = 22
+
+  }
+
+    provisioner "file" {
+    source      = "${path.module}/../../../SalesEvaluation.Backend/appsettings.Development.json"
+    destination = "/home/${var.admin_username}/appsettings.Development.json"
+  }
+
+
   source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
