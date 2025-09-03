@@ -1,8 +1,8 @@
 # SalesEvaluation
 
-This project is a learning project which is used for Azure dvelopment. This project entails steps on how to deploy projects to azure through various means such as:<br> 
+This project is a learning project for 360Rides, which is also used for Azure development. This project entails steps on how to deploy projects to Azure through various means such as:<br> 
     - Deploying on a virtual Machine<br>
-    - Deploying on an azure Web app<br>
+    - Deploying on an Azure Web app<br>
     - Deploying using Docker<br>
     - Deploying using Kubernetes.
 
@@ -32,18 +32,18 @@ This portion started off with creating: <br>
  1. A terrform cloud account
     - Creating an Organization
         - Creating a workspace
-            -  Linking it to this GithHub Repository (This is done by choosing the version control Workflow).
- 2. Next I configured terrfaorm cloud for single sign on with Microsoft Entra ID.
+            -  Linking it to this GitHub Repository (This is done by choosing the version control Workflow).
+ 2. Next, I configured Terraform Cloud for single sign-on with Microsoft Entra ID.
 
 
  #### RoadBlocks
-    Azure playground in Pluralsight has restrictions in azure which prevents me fro mcreating a managaed identity and as result I could not link to terraform cloud. So for now I will be performing most actions locally but these processes should still work in an actual azure environment.
+    Azure playground in Pluralsight has restrictions in azure which prevents me fro mcreating a managaed identity, and as resul,t I could not link to terraform cloud. So for now I will be performing most actions locally but these processes should still work in an actual azure environment.
 
 
 ### Local Development Steps
-1. Logged on to the playground using azure cli command **Az Login**. This prompts an interactive login.
+1. Logged on to the playground using the Azure CLI command **Az Login**. This prompts an interactive login.
 
-2. In the root of my application code, I created an Infra folder which I created my terrform main.tf file. For basic terraform commnands used: <br>
+2. In the root of my application code, I created an Infra folder where I created my Terraform main.tf file. For basic Terraform commands used: <br>
     - **terraform fmt** - For fromatting the code.
     - **terraform init** - For Initializing terraform. On running this, you should see a lock file and terraform folder.
     - **terraform plan** - For planning the infrastructure deployment.
